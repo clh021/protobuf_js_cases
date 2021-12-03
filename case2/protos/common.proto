@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package lnks;
+
+message EmptyMessage {
+}
+
+message GeneralResponseMessage {
+  required bool ok = 1;
+  required string reason = 2;
+}
