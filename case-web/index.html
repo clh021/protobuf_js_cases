@@ -45,6 +45,8 @@
             var buffer = MainWindowList.encode(message).finish();
             // 使用 buffer 搞事情...
             console.log("buffer:", buffer);
+            // let decoder = new TextDecoder('utf-8');
+            // console.log("decoder:", decoder.decode(buffer));
 
             // 将 Uint8Array (浏览器) 或 Buffer (node) 解码为 message
             var message = MainWindowList.decode(buffer);
