@@ -17,7 +17,9 @@
             var MainWindowList = root.lookupType("lnks.MainWindowList");
             var WindowId = root.lookupType("lnks.WindowId");
             var WindowId1 = WindowId.create({ chromiumId: "1" });
-            var WindowId2 = WindowId.create({ chromium_id: "2" });
+            // 警告：官方BUG：下划线的字段必须改为大写，改后无法通过验证
+            //              如果不改为大写，会丢失子消息体的数据
+            var WindowId2 = WindowId.create({ chromiumId: "2" });
             // 有效载荷
             var payload = {
                 ok: true,
