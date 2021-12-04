@@ -12,6 +12,22 @@ message MainWindowList {
   bool ok = 1;
   repeated WindowId windows = 2;
 }
+message MainWindowList2 {
+  int32 ok = 1;
+  repeated WindowId windows = 2;
+}
+message MainWindowList3 {
+  int32 ok = 1;
+  repeated int32 chromium_ids = 2;
+  repeated int32 gecko_ids = 3;
+}
+message MainWindowList4 {
+  repeated int32 chromium_ids = 1;
+}
+message MainWindowList5 {
+  int32 chromium_ids = 1;
+  int32 chromium_id = 2;
+}
 
 message MainWindowProps {
    WindowId id = 1;
