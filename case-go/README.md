@@ -13,6 +13,7 @@ Server
     make
     ./main
 
+make run
 go run main.go
 winList: %s ok:true windows:{chromium_id:1}
 winList: %s [8 1 18 2 8 1]

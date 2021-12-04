@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"main/message"
+	"main/protos/window"
 	"net/http"
 
 	"github.com/golang/protobuf/proto"
@@ -39,35 +38,38 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	winId1 := &message.WindowId{
-		ChromiumId: 1,
+	// protoc 对应包名 protobuf-compiler 有 bug，应使用 https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protoc-3.19.1-linux-x86_64.zip
+	var chromiumId int32
+	chromiumId = 1
+	winId1 := &window.WindowId{
+		ChromiumId: &chromiumId,
 	}
-	winList := &message.MainWindowList{
+	winList := &window.MainWindowList{
 		Ok:      true,
-		Windows: []*message.WindowId{winId1},
+		Windows: []*window.WindowId{winId1},
 	}
 	fmt.Println("winList: %s", winList)
 	winData, _ := proto.Marshal(winList)
 
 	fmt.Println("winList: %s", winData)
 
-	msg := &message.Message{
-		Id: proto.Int32(17),
-		Author: &message.Message_Person{
-			Id:   proto.Int32(1),
-			Name: proto.String("othree"),
-		},
-		Text: proto.String("Hi, this is message."),
-	}
+	// msg := &message.Message{
+	// 	Id: proto.Int32(17),
+	// 	Author: &message.Message_Person{
+	// 		Id:   proto.Int32(1),
+	// 		Name: proto.String("othree"),
+	// 	},
+	// 	Text: proto.String("Hi, this is message."),
+	// }
 
-	fmt.Println(msg.GetAuthor().GetName() + ": " + msg.GetText())
+	// fmt.Println(msg.GetAuthor().GetName() + ": " + msg.GetText())
 
-	data, _ = proto.Marshal(msg)
+	// data, _ = proto.Marshal(msg)
 
-	fmt.Println("%s", data)
+	// fmt.Println("%s", data)
 
-	http.HandleFunc("/ws", handler)
-	if err := http.ListenAndServe("127.0.0.1:1337", nil); err != nil {
-		log.Fatal(err)
-	}
+	// http.HandleFunc("/ws", handler)
+	// if err := http.ListenAndServe("127.0.0.1:1337", nil); err != nil {
+	// 	log.Fatal(err)
+	// }
 }
