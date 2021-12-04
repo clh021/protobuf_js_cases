@@ -7,4 +7,4 @@ require (
 	github.com/gorilla/websocket v1.4.2
 )
 
-require google.golang.org/protobuf v1.26.0 // indirect
+require google.golang.org/protobuf v1.27.1 // indirect

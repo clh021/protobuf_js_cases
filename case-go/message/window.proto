@@ -1,10 +1,14 @@
 syntax = "proto3";
 
+option go_package = "message/";
+// or message/window                    will mkdir -p
+// or github.com/xxx/xxx/message/window will mkdir -p
+
 package lnks;
 
 message WindowId {
-  optional int32 chromium_id = 1;
-  optional int32 gecko_id = 2;
+  int32 chromium_id = 1;
+  int32 gecko_id = 2;
 }
 
 message MainWindowList {
@@ -13,19 +17,19 @@ message MainWindowList {
 }
 
 message MainWindowProps {
-   WindowId id = 1;
-   bool ok = 2;
-  optional string title = 3;
-  optional bool visibility = 4;
-  optional int32 x = 5;
-  optional int32 y = 6;
-  optional int32 width = 7;
-  optional int32 height = 8;
-  optional string window_state = 9;
-  optional bool top_level_focus = 10;
-  optional string icon = 11;
-  optional string url = 12;
-  optional string app_id = 13;
-  optional bool skip_bar = 14;
-  optional bool always_on_top = 15;
+  WindowId id = 1;
+  bool ok = 2;
+  string title = 3;
+  bool visibility = 4;
+  int32 x = 5;
+  int32 y = 6;
+  int32 width = 7;
+  int32 height = 8;
+  string window_state = 9;
+  bool top_level_focus = 10;
+  string icon = 11;
+  string url = 12;
+  string app_id = 13;
+  bool skip_bar = 14;
+  bool always_on_top = 15;
 }
