@@ -39,6 +39,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	winId1 := &message.WindowId{
+		ChromiumId: 1,
+	}
+	winList := &message.MainWindowList{
+		Ok:      true,
+		Windows: []*message.WindowId{winId1},
+	}
+	fmt.Println("winList: %s", winList)
+	winData, _ := proto.Marshal(winList)
+
+	fmt.Println("winList: %s", winData)
 
 	msg := &message.Message{
 		Id: proto.Int32(17),
