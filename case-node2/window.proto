@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package lnks;
+
+message WindowId {
+  optional int32 chromium_id = 1;
+  optional int32 gecko_id = 2;
+}
+
+message MainWindowList {
+  bool ok = 1;
+  repeated WindowId windows = 2;
+}
+
+message Empty {
+}
+service Test {
+  rpc send (MainWindowList) returns (MainWindowList) {}
+}
