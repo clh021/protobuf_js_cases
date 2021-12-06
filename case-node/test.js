@@ -17,6 +17,16 @@ console.log(windowList);
 var encode = windowList.serializeBinary();
 console.log("encode:", encode);
 
-var decode = message.MainWindowList.deserializeBinary(encode);
-console.log("decode:", decode);
+
+var winProps = new message.MainWindowProps();
+winProps.setOk(true);
+winProps.setId(windowId);
+winProps.setTitle("test");
+
+var encode = winProps.serializeBinary();
+console.log("encode:", encode);
+
+
+// var decode = message.MainWindowList.deserializeBinary(encode);
+// console.log("decode:", decode);
 

@@ -53,6 +53,17 @@ func main() {
 
 	fmt.Println("winList: %s", winData)
 
+	winTitle := "test"
+	winProps := &window.MainWindowProps{
+		Id:    winId1,
+		Ok:    true,
+		Title: &winTitle,
+	}
+	fmt.Println("winProps: %s", winProps)
+	winPropsData, _ := proto.Marshal(winProps)
+
+	fmt.Println("winProps: %s", winPropsData)
+
 	// msg := &message.Message{
 	// 	Id: proto.Int32(17),
 	// 	Author: &message.Message_Person{
