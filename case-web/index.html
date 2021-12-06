@@ -9,6 +9,78 @@
 </head>
 <body>
     <script>
+        var string = 'bada55';
+        var bytes = new Uint8Array(Math.ceil(string.length / 2));
+        for (var i = 0; i < bytes.length; i++) bytes[i] = parseInt(string.substr(i * 2, 2), 16);
+        console.log(bytes);
+
+        var convertedBack = '';
+        for (var i = 0; i < bytes.length; i++) {
+            if (bytes[i] < 16) convertedBack += '0';
+                convertedBack += bytes[i].toString(16);
+        }
+        console.log(convertedBack);
+
+        const fromHexString = hexString => new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+        const toHexString = bytes => bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+
+        function toHex1(buffer) {
+            return Array.prototype.map.call(buffer, x => ('00' + x.toString(16)).slice(-2)).join('');
+        }
+        function toHex2(buffer) {
+            return Array.prototype.map.call(buffer, x => x.toString(16).padStart(2, '0')).join('');
+        }
+        const LUT_HEX_4b = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+        const LUT_HEX_8b = new Array(0x100);
+        for (let n = 0; n < 0x100; n++) {
+            LUT_HEX_8b[n] = `${LUT_HEX_4b[(n >>> 4) & 0xF]}${LUT_HEX_4b[n & 0xF]}`;
+        }
+        function toHex3(buffer) {
+            return Array.prototype.map.call(buffer, x => `${LUT_HEX_4b[(x >>> 4) & 0xF]}${LUT_HEX_4b[x & 0xF]}`).join('');
+        }
+        function toHex4(buffer) {
+            return Array.prototype.map.call(buffer, x => (LUT_HEX_4b[(x >>> 4) & 0xF] + LUT_HEX_4b[x & 0xF])).join('');
+        }
+        function toHex5(buffer) {
+            return Array.prototype.map.call(buffer, x => LUT_HEX_8b[x]).join('');
+        }
+        function toHex6(buffer) {
+            let out = '';
+            for (let idx = 0; idx < buffer.length; idx++) {
+                let n = buffer[idx];
+                out += LUT_HEX_4b[(n >>> 4) & 0xF];
+                out += LUT_HEX_4b[n & 0xF];
+            }
+            return out;
+        }
+        function buf2hex(buffer) { // buffer is an ArrayBuffer
+            return [...new Uint8Array(buffer)]
+                .map(x => x.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        // EXAMPLE:
+        // const buffer = new Uint8Array([ 4, 8, 12, 16 ]).buffer;
+        // console.log(buf2hex(buffer)); // = 04080c10
+
+        function printUint8Array(binBufferStream, messageTag) {
+            console.log("== "+messageTag+" ========>:");
+            console.log("Binary serialized:", binBufferStream);
+            console.log("   JSON.stringify:", JSON.stringify(binBufferStream));
+            let hex = buf2hex(binBufferStream);
+            console.log("              hex:", buf2hex(binBufferStream));
+            // console.log("              hex:", Buffer.from(binBufferStream).toString('hex')); // Nodejs
+            console.log("              hex:", toHex1(binBufferStream));
+            console.log("              hex:", toHex2(binBufferStream));
+            console.log("              hex:", toHex3(binBufferStream));
+            console.log("              hex:", toHex4(binBufferStream));
+            console.log("              hex:", toHex5(binBufferStream));
+            console.log("              hex:", toHex6(binBufferStream));
+            return hex;
+        }
+        function hexToUnit8Array() {
+
+        }
         protobuf.load("./protos/window.proto", function (err, root) {
             if (err) {
                 throw err;
@@ -45,6 +117,7 @@
             var buffer = MainWindowList.encode(message).finish();
             // 使用 buffer 搞事情...
             console.log("buffer:", buffer);
+            printUint8Array(buffer, "MainWindowList1");
             // let decoder = new TextDecoder('utf-8');
             // console.log("decoder:", decoder.decode(buffer));
 
