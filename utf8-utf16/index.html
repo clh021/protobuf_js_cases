@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demo</title>
+</head>
+
+<body>
+    <script>
+        const unicode2 = {
+            /**
+                   * Convert a UTF16 string to UTF8.
+                   * @param {String} input
+                   * @returns {String}
+                   */
+            utf16To8: function (input) {
+                var _unescape = function (s) {
+                    function d(x, n) {
+                        return String.fromCharCode(parseInt(n, 16));
+                    }
+                    return s.replace(/%([0-9A-F]{2})/ig, d);
+                };
+                try {
+                    return _unescape(encodeURIComponent(input));
+                } catch (URIError) {
+                    //include invalid character, cannot convert
+                    return input;
+                }
+            },
+            /**
+             * Convert a UTF8 string to UTF16.
+             * @param {String} input
+             * @returns {String}
+             */
+            utf8To16: function (input) {
+                var _escape = function (s) {
+                    function q(c) {
+                        c = c.charCodeAt();
+                        return '%' + (c < 16 ? '0' : '') + c.toString(16).toUpperCase();
+                    }
+                    return s.replace(/[\x00-),:-?[-^`{-\xFF]/g, q);
+                };
+                try {
+                    return decodeURIComponent(_escape(input));
+                } catch (URIError) {
+                    //include invalid character, cannot convert
+                    return input;
+                }
+            },
+
+
+            /**
+                        * Actually is utf16 string in js to utf8 byte array
+                        *
+                        * @param str
+                        * @returns {Array}
+                        */
+            __stringToArray: function (str) {
+                var utf8 = [];
+                for (var i = 0; i < str.length; i++) {
+                    var charcode = str.charCodeAt(i);
+                    if (charcode < 0x80) utf8.push(charcode);
+                    else if (charcode < 0x800) {
+                        utf8.push(0xc0 | (charcode >> 6),
+                            0x80 | (charcode & 0x3f));
+                    }
+                    else if (charcode < 0xd800 || charcode >= 0xe000) {
+                        utf8.push(0xe0 | (charcode >> 12),
+                            0x80 | ((charcode >> 6) & 0x3f),
+                            0x80 | (charcode & 0x3f));
+                    }
+                    // surrogate pair
+                    else {
+                        i++;
+                        // UTF-16 encodes 0x10000-0x10FFFF by
+                        // subtracting 0x10000 and splitting the
+                        // 20 bits of 0x0-0xFFFFF into two halves
+                        charcode = 0x10000 + (((charcode & 0x3ff) << 10)
+                            | (str.charCodeAt(i) & 0x3ff))
+                        utf8.push(0xf0 | (charcode >> 18),
+                            0x80 | ((charcode >> 12) & 0x3f),
+                            0x80 | ((charcode >> 6) & 0x3f),
+                            0x80 | (charcode & 0x3f));
+                    }
+                }
+                return utf8;
+            },
+            /**
+             * Actually from utf8 byte array to utf16 string in js
+             * @param input
+             * @returns {string}
+             */
+            __arrayToString: function (input) {
+                var i, str = '';
+
+                for (i = 0; i < input.length; i++) {
+                    str += '%' + ('0' + input[i].toString(16)).slice(-2);
+                }
+                str = decodeURIComponent(str);
+                return str;
+            },
+        }
+        class unicode {
+            /**
+             * Convert a Uint8Array in UTF-8 to a Javascript string
+             * @param uint8_array a Uint8Array in UTF-8
+             * @return a Javascript string encoded in standard UTF-16
+             */
+            static utf8_to_string(uint8_array) {
+                var str = "";
+                for (var i = 0; i < uint8_array.byteLength; i++) {
+                    if (uint8_array[i] < 128)
+                        str += String.fromCodePoint(uint8_array[i]);
+                    else
+                        str += '%' + uint8_array[i].toString(16);
+                }
+                return decodeURIComponent(str);
+            }
+            /**
+             * Convert a javascript string to Uint8Array UTF-8. 
+             * @param str the string to convert
+             * @return a Uint8Array in UTF-8
+             */
+            static string_to_utf8(str) {
+                var encoded = encodeURIComponent(str);
+                // NB % sign itself encoded as %25
+                var bytes = Array();
+                var state = 0;
+                for (var i = 0; i < encoded.length; i++) {
+                    switch (state) {
+                        case 0:    // convert characters to bytes
+                            if (encoded[i] == '%')
+                                state = 1;
+                            else
+                                bytes.push(encoded.codePointAt(i));
+                            break;
+                        case 1:    // seen '%'
+                            state = 2;
+                            break;
+                        case 2:    // seen %H
+                            bytes.push(parseInt(encoded.substring(i - 1, i + 1), 16));
+                            state = 0;
+                            break;
+                    }
+                }
+                return new Uint8Array(bytes);
+            }
+            /**
+             * Convert a javascript string to Uint16Array UTF-16. 
+             * @param str the string to convert
+             * @return a Uint16Array in UTF-16
+             */
+            static string_to_utf16(str) {
+                var arr = new Uint16Array(str.length);
+                for (var i = 0; i < str.length; i++)
+                    arr[i] = str.charCodeAt(i);
+                return arr;
+            }
+            /**
+             * Convert a Uint16Array in UTF-16 to a Javascript string
+             * @param uint16_array a Uint16Array in utf-16
+             * @return a Javascript string
+             */
+            static utf16_to_string(uint16_array) {
+                var str = "";
+                for (var i = 0; i < uint16_array.length; i++)
+                    str += String.fromCharCode(uint16_array[i]);
+                return str;
+            }
+        }
+        function test() {
+            var u8_arr = unicode.string_to_utf8("dógs lov€ 𤭢s");
+            var str = unicode.utf8_to_string(u8_arr);
+            console.log(("dógs lov€ 𤭢s" == str) ? "utf-8 test passed" : "utf-8 test failed");
+            var u16_arr = unicode.string_to_utf16("dógs lov€ 𤭢s");
+            str = unicode.utf16_to_string(u16_arr);
+            console.log(("dógs lov€ 𤭢s" == str) ? "utf-16 test passed" : "utf-16 test failed");
+        }
+        
+        function stringToUint8Array(string) {
+            const hex = new Array(string.length);
+            for (let i = 0; i < string.length; ++i) {
+                hex[i] = string.charCodeAt(i);
+            }
+            return new Uint8Array(hex);
+        }
+        function stringToUint16Array(string) {
+            const hex = new Array(string.length);
+            for (let i = 0; i < string.length; ++i) {
+                hex[i] = string.charCodeAt(i);
+            }
+            return new Uint16Array(hex);
+        }
+        function _10To16(number) {
+            return number.toString(16);
+        }
+        function _16To10(str) {
+            return parseInt(str, 16);
+        }
+        /**
+         * eg: bytesTo10("e7 a4 ba e4 be 8b");
+         * output: "231 164 186 228 190 139"
+         */
+        function bytesTo10(string) {
+            return string.split(" ").map(x => parseInt(x, 16)).join(" ");
+        }
+        /**
+         * eg: bytesTo16("8.1.26.2.8.1.34.6.231.164.186.228.190.57");
+         * output:
+         */
+        function bytesTo16(string) {
+            console.log(string.split(".").length);
+            return string.split(".").map(x => parseInt(x).toString(16)).join(" ");
+        }
+        function _chineseTo16(str) {
+            let code = encodeURI(str);
+            codeList = code.split('%');
+            console.log(codeList.join(" "));
+            let res = codeList.map(item => parseInt(item, 16));
+            res.shift();
+            return res;
+        }
+        /**
+         * eg: _16ToChinese("231 164 186 228 190 139")
+         * eg: _16ToChinese("E7 A4 BA E4 BE 8B"," ", false)
+         * output: 
+         */ 
+        function _16ToChinese(str, splitChar=" ", trans=true) {
+            let codeList = str.split(splitChar);
+            let code = codeList.map(item => '%' + (trans ? parseInt(item).toString(16) : item)).join('');
+            return decodeURI(code);
+        }
+        function testChinese() {
+            var s1 = "示例";
+            var s2 = "示侹";
+            var s3 =  "哈哈哈哈哈哈哈哈哈";
+            // let u8_s1 = unicode.string_to_utf8(s1);
+            // let u8_s2 = unicode.string_to_utf8(s2);
+            // console.log("u8_s1:", u8_s1);
+            // console.log("u8_s2:", u8_s2);
+            // let u16_s1 = unicode.string_to_utf16(s1);
+            // let u16_s2 = unicode.string_to_utf16(s2);
+            // console.log("u16_s1:", u16_s1);
+            // console.log("u16_s2:", u16_s2);
+
+            console.log("ct16_s1:", _chineseTo16(s1));
+            console.log("ct16_s2:", _chineseTo16(s2));
+            console.log("ct16_s3:", _chineseTo16(s3));
+            console.log("16tc_s1:", _16ToChinese("231, 164, 186, 228, 190, 139"));
+            console.log("16tc_s2:", _16ToChinese("231, 164, 186, 228, 190, 185"));
+            console.log("16tc_s3:", _16ToChinese("E5 93 88 E5 93 88 E5 93 88 E5 93 88 E5 93 88 E5 93 88 E5 93 88 E5 93 88 E5 93 88"," ", false));
+            // console.log(s3, stringToUint8Array(s3)); // wrong
+            // console.log(s3, stringToUint16Array(s3)); // wrong
+            // console.log(s3, unicode.string_to_utf8(s3)); // error
+
+            // console.log("u8_s1:", unicode2.__stringToArray(s1));
+            // console.log("u16_s1:", unicode2.utf8To16(unicode2.__stringToArray(s1)));
+            // console.log("u8_s2:", unicode2.__stringToArray(s2));
+            // console.log("u16_s2:", unicode2.utf8To16(unicode2.__stringToArray(s2)));
+        }
+        testChinese();
+    </script>
+</body>
+
+</html>
