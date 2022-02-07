@@ -1,0 +1,22 @@
+syntax = "proto3";
+package lnks;
+
+// protoc 对应包名 protobuf-compiler 有 bug，应使用 https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protoc-3.19.1-linux-x86_64.zip
+option go_package = "protos/window";
+// or message/window                    will mkdir -p
+// or github.com/xxx/xxx/message/window will mkdir -p
+
+
+service Test {
+  rpc Send(MainWindowList) returns (MainWindowList) {}
+}
+
+message WindowId {
+  optional int32 chromium_id = 1;
+  optional int32 gecko_id = 2;
+}
+
+message MainWindowList {
+  bool ok = 1;
+  repeated WindowId windows = 2;
+}

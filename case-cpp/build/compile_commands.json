@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build",
+  "command": "/bin/x86_64-linux-gnu-g++-10 -O0 -g -std=c++11 -g -o CMakeFiles/test_SerializeToString.dir/main.cpp.o -c /home/chenlianghong/Projects/js-protobuf-example/case-cpp/main.cpp",
+  "file": "/home/chenlianghong/Projects/js-protobuf-example/case-cpp/main.cpp"
+},
+{
+  "directory": "/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build",
+  "command": "/bin/x86_64-linux-gnu-g++-10 -O0 -g -std=c++11 -g -o CMakeFiles/test_SerializeToString.dir/msg.pb.cc.o -c /home/chenlianghong/Projects/js-protobuf-example/case-cpp/build/msg.pb.cc",
+  "file": "/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build/msg.pb.cc"
+}
+]

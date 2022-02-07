@@ -9,7 +9,7 @@ using namespace protobuf;
 
 int write(const string &filename)
 {
-    lnks::WindowId winId1;
+    lnks::WindowId winId1 = new lnks::WindowId;
     lnks::MainWindowList winList;
     winId1.chromium_id(1);
     winList.ok(true);

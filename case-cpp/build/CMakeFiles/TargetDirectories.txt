@@ -1,0 +1,3 @@
+/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build/CMakeFiles/rebuild_cache.dir
+/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build/CMakeFiles/edit_cache.dir
+/home/chenlianghong/Projects/js-protobuf-example/case-cpp/build/CMakeFiles/test_SerializeToString.dir

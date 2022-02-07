@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/nyrobert/js-protobuf-example.git"
   },
-  "devDependencies": {
-    "google-protobuf": "^3.19.1"
+  "dependencies": {
+    "google-protobuf": "^3.0.0"
   }
 }

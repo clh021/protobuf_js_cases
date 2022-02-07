@@ -6,103 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>demo</title>
+    <script src="//cdn.rawgit.com/dcodeIO/protobuf.js/6.X.X/dist/protobuf.js"></script>
 </head>
 
 <body>
     <script>
-        const unicode2 = {
-            /**
-                   * Convert a UTF16 string to UTF8.
-                   * @param {String} input
-                   * @returns {String}
-                   */
-            utf16To8: function (input) {
-                var _unescape = function (s) {
-                    function d(x, n) {
-                        return String.fromCharCode(parseInt(n, 16));
-                    }
-                    return s.replace(/%([0-9A-F]{2})/ig, d);
-                };
-                try {
-                    return _unescape(encodeURIComponent(input));
-                } catch (URIError) {
-                    //include invalid character, cannot convert
-                    return input;
-                }
-            },
-            /**
-             * Convert a UTF8 string to UTF16.
-             * @param {String} input
-             * @returns {String}
-             */
-            utf8To16: function (input) {
-                var _escape = function (s) {
-                    function q(c) {
-                        c = c.charCodeAt();
-                        return '%' + (c < 16 ? '0' : '') + c.toString(16).toUpperCase();
-                    }
-                    return s.replace(/[\x00-),:-?[-^`{-\xFF]/g, q);
-                };
-                try {
-                    return decodeURIComponent(_escape(input));
-                } catch (URIError) {
-                    //include invalid character, cannot convert
-                    return input;
-                }
-            },
-
-
-            /**
-                        * Actually is utf16 string in js to utf8 byte array
-                        *
-                        * @param str
-                        * @returns {Array}
-                        */
-            __stringToArray: function (str) {
-                var utf8 = [];
-                for (var i = 0; i < str.length; i++) {
-                    var charcode = str.charCodeAt(i);
-                    if (charcode < 0x80) utf8.push(charcode);
-                    else if (charcode < 0x800) {
-                        utf8.push(0xc0 | (charcode >> 6),
-                            0x80 | (charcode & 0x3f));
-                    }
-                    else if (charcode < 0xd800 || charcode >= 0xe000) {
-                        utf8.push(0xe0 | (charcode >> 12),
-                            0x80 | ((charcode >> 6) & 0x3f),
-                            0x80 | (charcode & 0x3f));
-                    }
-                    // surrogate pair
-                    else {
-                        i++;
-                        // UTF-16 encodes 0x10000-0x10FFFF by
-                        // subtracting 0x10000 and splitting the
-                        // 20 bits of 0x0-0xFFFFF into two halves
-                        charcode = 0x10000 + (((charcode & 0x3ff) << 10)
-                            | (str.charCodeAt(i) & 0x3ff))
-                        utf8.push(0xf0 | (charcode >> 18),
-                            0x80 | ((charcode >> 12) & 0x3f),
-                            0x80 | ((charcode >> 6) & 0x3f),
-                            0x80 | (charcode & 0x3f));
-                    }
-                }
-                return utf8;
-            },
-            /**
-             * Actually from utf8 byte array to utf16 string in js
-             * @param input
-             * @returns {string}
-             */
-            __arrayToString: function (input) {
-                var i, str = '';
-
-                for (i = 0; i < input.length; i++) {
-                    str += '%' + ('0' + input[i].toString(16)).slice(-2);
-                }
-                str = decodeURIComponent(str);
-                return str;
-            },
-        }
         class unicode {
             /**
              * Convert a Uint8Array in UTF-8 to a Javascript string
@@ -255,13 +163,160 @@
             // console.log(s3, stringToUint8Array(s3)); // wrong
             // console.log(s3, stringToUint16Array(s3)); // wrong
             // console.log(s3, unicode.string_to_utf8(s3)); // error
-
-            // console.log("u8_s1:", unicode2.__stringToArray(s1));
-            // console.log("u16_s1:", unicode2.utf8To16(unicode2.__stringToArray(s1)));
-            // console.log("u8_s2:", unicode2.__stringToArray(s2));
-            // console.log("u16_s2:", unicode2.utf8To16(unicode2.__stringToArray(s2)));
         }
-        testChinese();
+            // function stringToUint8Array2(string) {
+            //     const hex = new Array(string.length);
+            //     for (let i = 0; i < string.length; ++i) {
+            //         hex[i] = string.charCodeAt(i);
+            //     }
+            //     return new Uint8Array(hex);
+            // }
+            // function decodeUTF16LE(binaryStr) {
+            //     var cp = [];
+            //     for (var i = 0; i < binaryStr.length; i += 2) {
+            //         cp.push(
+            //             binaryStr.charCodeAt(i) |
+            //             (binaryStr.charCodeAt(i + 1) << 8)
+            //         );
+            //     }
+            //     return String.fromCharCode.apply(String, cp);
+            // }
+            // function encodeUTF16LE(text) {
+            //     var byteArray = new Uint8Array(text.length * 2);
+            //     for (var i = 0; i < text.length; i++) {
+            //         byteArray[i * 2] = text.charCodeAt(i) // & 0xff;
+            //         byteArray[i * 2 + 1] = text.charCodeAt(i) >> 8 // & 0xff;
+            //     }
+            //     return byteArray;
+            // }
+            // let resBytes = new Uint8Array([200, 84, 200, 84, 200, 84, 200, 84]);
+            // decodeUTF16LE(atob("哈哈哈哈"));
+            // encodeUTF16LE("哈哈哈哈");
+
+
+            function fromUTF8Array(data) { // array of bytes
+                var str = '',
+                    i;
+
+                for (i = 0; i < data.length; i++) {
+                    var value = data[i];
+
+                    if (value < 0x80) {
+                        str += String.fromCharCode(value);
+                    } else if (value > 0xBF && value < 0xE0) {
+                        str += String.fromCharCode((value & 0x1F) << 6 | data[i + 1] & 0x3F);
+                        i += 1;
+                    } else if (value > 0xDF && value < 0xF0) {
+                        str += String.fromCharCode((value & 0x0F) << 12 | (data[i + 1] & 0x3F) << 6 | data[i + 2] & 0x3F);
+                        i += 2;
+                    } else {
+                        // surrogate pair
+                        var charCode = ((value & 0x07) << 18 | (data[i + 1] & 0x3F) << 12 | (data[i + 2] & 0x3F) << 6 | data[i + 3] & 0x3F) - 0x010000;
+
+                        str += String.fromCharCode(charCode >> 10 | 0xD800, charCode & 0x03FF | 0xDC00);
+                        i += 3;
+                    }
+                }
+
+                return str;
+            }
+
+        
+
+        function buf2hex(buffer) { // buffer is an ArrayBuffer
+            return [...new Uint8Array(buffer)]
+                .map(x => x.toString(16).padStart(2, '0'))
+                .join(' ');
+        }
+        function printUint8Array(binBufferStream, messageTag) {
+            console.log("== " + messageTag + " ========>:");
+            console.log("Binary serialized:", binBufferStream);
+            // console.log("   JSON.stringify:", JSON.stringify(binBufferStream));
+            let hex = buf2hex(binBufferStream);
+            console.log("              hex:", buf2hex(binBufferStream));
+            return hex;
+        }
+        function testProtoBufChinese() {
+            protobuf.load("./window.proto", function (err, root) {
+                if (err) {
+                    throw err;
+                }
+                // // 获得 message 类型
+                var MainWindowProps = root.lookupType("lnks.MainWindowProps");
+                function bufChinese(payload) {
+                    console.log("-------------------------\r\npayload:", payload);
+                    var message = MainWindowProps.create(payload);
+                    var buffer = MainWindowProps.encode(message).finish();
+                    printUint8Array(buffer, "MainWindowProps1");
+                    // let decoder = new TextDecoder('utf-8');
+                    // console.log("decoder:", decoder.decode(buffer));
+
+                    // 将 Uint8Array (浏览器) 或 Buffer (node) 解码为 message
+                    var message = MainWindowProps.decode(buffer);
+                    console.log("message:", message);
+                    console.log("json:", JSON.stringify(message));
+
+                    // resBytes = new Uint8Array([10, 2, 8, 1, 16, 1, 26, 6, 231, 164, 186, 228, 190, 185]);
+                    // console.log('2:   ', resBytes instanceof Uint8Array);
+                    // console.log(Array.isArray(resBytes));
+                    // var message = MainWindowProps.decode(resBytes);
+                    // console.log("message:", message);
+                    // console.log("json:", MainWindowProps.toObject(message));
+
+                    // 如果应用程序使用了长度分隔的 buffer，那么也会有 encodeDelimited 的 buffer 和 decodeDelimited 的 buffer。
+
+                    // 可以将 message 转换回简单对象
+                    // var object = MainWindowProps.toObject(message, {
+                        // longs: String,
+                        // enums: String,
+                        // bytes: String,
+                        // 参见 ConversionOptions
+                        // enums: String,  // 以字符串名称进行枚举
+                        // longs: String,  // 将 longs 作为字符串 (需要 long.js)
+                        // bytes: String,  // 将字节作为 base65 编码的字符串
+                        // defaults: true, // 包含默认值
+                        // arrays: true,   // 填充空数组(重复字段)，即使 defaults = false
+                        // objects: true,  // 填充空对象(映射字段)，即使 defaults = false
+                        // oneofs: true    // 是否包括设置为当前字段名称的字段的虚拟字段
+                    // });
+                    // console.log("object:", object);
+                }
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "示侹" });
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "示例" });
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "哈哈哈哈" });
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "圆圆圆圆" });
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "Chromium双引擎Test测试" });
+                bufChinese({ "ok": true, "id": { "chromiumId": 1 }, "title": "Chromium叒弢朽Test浹询" });
+            })
+        }
+        // testProtoBufChinese();
+
+
+        /**
+         * input: 08 01 1a 02 08 01 22 0c e5 1c c6 e5 1c c6 e5 1c c6 e5 1c c6
+         * {"ok":true,"id":{"chromiumId":1},"title":"圆圆圆圆"}
+         * 8, 1, 26, 2, 8, 1, 34, 12, 229,  28, 198, 229,  28, 198, 229,  28, 198, 229,  28, 198
+         * output:08 01 1a 02 08 01 22 0c e5 93 88 e5 93 88 e5 93 88 e5 93 88
+         * {"ok":true,"id":{"chromiumId":1},"title":"哈哈哈哈"}
+         * 8, 1, 26, 2, 8, 1, 34, 12, 229, 147, 136, 229, 147, 136, 229, 147, 136, 229, 147, 136
+         * 
+         * input: 08 01 1a 02 08 01 22 1b 43 68 72 6f 6d 69 75 6d e5 8f 52 e5 bc 22 e6 1c 7d 54 65 73 74 e6 b5 39 e8 af 22
+         * {"ok":true,"id":{"chromiumId":1},"title":"Chromium叒弢朽Test浹询"}
+         * 8.1.26.2.8.1.34.27.67.104.114.111.109.105.117.109.229.143.82.229.188.34.230.28.125.84.101.115.116.230.181.57.232.175.34
+         * output:
+         * {"ok":true,"id":{"chromiumId":1},"title":"Chromium双引擎Test测试"}
+         * 
+         */
+        // function UTF8ToUTF16() {
+        //     let input = new Uint8Array([8, 1, 26, 2, 8, 1, 34, 12, 229, 28, 198, 229, 28, 198, 229, 28, 198, 229, 28, 198]);
+        //     // return input.decode("utf-8").encode("utf-16");
+        //     return fromUTF8Array(input);
+        // }
+
+        let c = '好' === "\u597D";
+        console.log(c, '好'.codePointAt(0), "\u597D");
+        console.log(d, '好', "\u{597D}");
+        
     </script>
 </body>
 

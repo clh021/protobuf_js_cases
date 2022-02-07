@@ -31,9 +31,22 @@ message MainWindowProps {
 
 message Empty {
 }
-service Test {
+message Test1 {
+  optional int32 a = 1;
+}
+message Test2 {
+  optional string b = 2;
+}
+
+service S1 {
   rpc send (MainWindowList) returns (MainWindowList) {}
 }
-service Test2 {
+service S2 {
   rpc send (MainWindowProps) returns (MainWindowProps) {}
+}
+service S3 {
+  rpc send (Test1) returns (Test1) {}
+}
+service S4 {
+  rpc send (Test2) returns (Test2) {}
 }
